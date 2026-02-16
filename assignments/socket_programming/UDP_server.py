@@ -15,9 +15,9 @@ last_request_time = time.time()
 while True:
     now = time.time()
     # remove expired IDs (older than 60s)
-    connections = {cid: t for cid, t in connections.items() if now - t < 15}
+    connections = {cid: t for cid, t in connections.items() if now - t < 60}
     # server idle timeout 5 min
-    if now - last_request_time > 30:
+    if now - last_request_time > 300:
         break
 
     try:
@@ -37,6 +37,5 @@ while True:
         reply = f"OK {connId} {addr[0]} {addr[1]}"
 
     sock.sendto(reply.encode(), addr)
-    print(connections)
 
 sock.close()
