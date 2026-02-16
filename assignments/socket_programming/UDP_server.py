@@ -9,15 +9,19 @@ SERVER_PORT = int(sys.argv[2])
 sock.bind((SERVER_IP, SERVER_PORT))
 sock.settimeout(1)
 
-connections = {}  # id -> timestamp
+connections = {}  # dictionary pairing: id -> timestamp
 last_request_time = time.time()
 
 while True:
     now = time.time()
-    # remove expired IDs (older than 60s)
-    connections = {cid: t for cid, t in connections.items() if now - t < 60}
-    # server idle timeout 5 min
-    if now - last_request_time > 300:
+    # remove expired IDs (older than 60 seconds)
+    new_connections = {}
+    for connId, connTime in connections.items():
+        if (now - connTime) < 60:
+            new_connections[connId] = connTime
+    connections = new_connections
+    # server idle timeout (5 minutes)
+    if (now - last_request_time) > 300:
         break
 
     try:
