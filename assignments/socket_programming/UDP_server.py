@@ -42,7 +42,7 @@ while True:
     try:
         data, addr = sock.recvfrom(1024) # for small msgs (1KB dedicated): HELLO ID
         last_request_time = time.time()
-        # timeout threads
+        # threading improved parallel performance
         threading.Thread(
             target=handle_client,
             args=(sock, data, addr)
