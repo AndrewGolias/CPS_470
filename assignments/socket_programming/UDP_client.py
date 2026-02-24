@@ -12,7 +12,7 @@ CONNECTION_ID = sys.argv[4]
 
 tries = 0 # track user input for new connection ID attempts (max 3 tries)
 
-while validMsg and tries <= 3:
+while validMsg and tries <= 3: # allows for 3 inputs after initial failed attempt
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.settimeout(60)
@@ -31,7 +31,7 @@ while validMsg and tries <= 3:
             sock.close()
     except socket.timeout:
         print(f"Connection Timeout")
-    except ConnectionResetError:
+    except Exception:
         break
 
     tries += 1

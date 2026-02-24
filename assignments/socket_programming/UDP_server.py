@@ -1,14 +1,26 @@
 import socket
 import sys
 import time
+import threading
 
 SERVER_IP = sys.argv[1]
 SERVER_PORT = int(sys.argv[2])
 
+def handle_client(sock, d, client_addr):
+    connectionId = d.decode('utf-8').strip().split()[1]
+    if connectionId in connections:
+        reply = f"RESET {connectionId}"
+    else:
+        connections[connectionId] = time.time()
+        reply = f"OK {connectionId} {client_addr[0]} {client_addr[1]}"
+
+    sock.sendto(reply.encode('utf-8'), client_addr)
+
 try:
+    # create socket for all UDP communication
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((SERVER_IP, SERVER_PORT))
-    sock.settimeout(60)
+    sock.settimeout(1)
 except socket.timeout:
     sys.exit()
 
@@ -20,7 +32,7 @@ while True:
     # remove expired IDs (older than 60 seconds)
     living_connections = {}
     for connId, connTime in connections.items():
-        if (now - connTime) < sock.gettimeout():
+        if (now - connTime) < 60:
             living_connections[connId] = connTime
     connections = living_connections
     # server idle timeout (5 minutes)
@@ -30,18 +42,15 @@ while True:
     try:
         data, addr = sock.recvfrom(1024) # for small msgs (1KB dedicated): HELLO ID
         last_request_time = time.time()
+        # timeout threads
+        threading.Thread(
+            target=handle_client,
+            args=(sock, data, addr)
+        ).start()
 
-        client_data = data.decode()
-
-        connId = data.decode().strip().split()[1]
-        if connId in connections:
-            reply = f"RESET {connId}"
-        else:
-            connections[connId] = time.time()
-            reply = f"OK {connId} {addr[0]} {addr[1]}"
-
-        sock.sendto(reply.encode(), addr)
-    except socket.timeout or KeyboardInterrupt:
+    except socket.timeout:
+        pass
+    except KeyboardInterrupt:
         break
 
 sock.close()
