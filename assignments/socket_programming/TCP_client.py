@@ -19,7 +19,7 @@ while tries <= 3:
         data = sock.recv(4096)
 
         if not data:
-            print("connection failure")
+            print("Connection Failure")
             break
 
         reply = data.decode().split()
@@ -29,7 +29,7 @@ while tries <= 3:
             sock.close()
             sys.exit(0)
         else:
-            print(f"Connection Error {reply[1]}")
+            print(f"Connection Error {CONNECTION_ID}")
     except socket.timeout:
         print(f"Connection Timeout")
     except ConnectionResetError:
