@@ -28,6 +28,8 @@ def handle_client(conn, addr):
         parts = data.decode().strip().split()
         if len(parts) < 2:
             return
+        if parts[0] != "HELLO":
+            return
 
         connId = parts[1]
 
@@ -50,11 +52,12 @@ while True:
     now = time.time()
 
     # Remove expired IDs
-    new_connections = {}
-    for connId, connTime in connections.items():
-        if (now - connTime) < 60:
-            new_connections[connId] = connTime
-    connections = new_connections
+    with conn_lock:
+        new_connections = {}
+        for connId, connTime in connections.items():
+            if (now - connTime) < 60:
+                new_connections[connId] = connTime
+        connections = new_connections
 
     # Idle timeout
     if (now - last_request_time) > 300:
