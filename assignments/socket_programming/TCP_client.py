@@ -29,7 +29,7 @@ while tries <= 3:
             sock.close()
             sys.exit(0)
         else:
-            print(f"Connection Error {CONNECTION_ID}")
+            print(f"Connection Error {reply[1]}")
     except socket.timeout:
         print(f"Connection Timeout")
     except ConnectionResetError:
